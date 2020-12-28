@@ -4,7 +4,7 @@ Version: Spark 3.0.0
 
 Avec scala:
 ```scala
-import feature.CustomVectorIndexer
+import feature.CustomStringIndexer
 val df = Seq(
     (0, "aa"), 
     (1, "ab"),
@@ -13,11 +13,11 @@ val df = Seq(
     (4, "aa")
 ).toDF("ID", "CATEGORY")
 
-val vectorizer = new CustomVectorIndexer()
+val indexer = new CustomStringIndexer()
                   .setInputCol("CATEGORY")
                   .setOutputCol("CATEGORY_INDEX")
 
-vectorizer.fit(df).transform(df).show()
+indexer.fit(df).transform(df).show()
 
 ```
 ```
@@ -35,14 +35,14 @@ vectorizer.fit(df).transform(df).show()
 Avec python:
 
 ```python
-from feature import CustomVectorIndexer, CustomVectorIndexerModel
+from feature import CustomStringIndexer, CustomStringIndexerModel
 
 seq =  [(0, "aa"), (1, "ab"), (2, "cd"), (3, "ad"), (4, "aa")]
 dfm = spark.createDataFrame(seq).toDF("ID", "CATEGORY")
-vectorizer = CustomVectorIndexer()\
+indexer = CustomStringIndexer()\
               .setInputCol('CATEGORY')\
               .setOutputCol('CATEGORY_FITTED')
-model  = vectorizer.fit(dfm)
+model  = indexer.fit(dfm)
 model.transform(dfm).show(truncate=False)
 
 ```
@@ -56,9 +56,4 @@ model.transform(dfm).show(truncate=False)
 |3  |ad      |2              |
 |4  |aa      |0              |
 +---+--------+---------------+
-```
-
-
-```python
-
 ```

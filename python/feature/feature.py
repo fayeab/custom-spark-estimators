@@ -42,12 +42,12 @@ class ColumnFilter(JavaTransformer, HasDropCol, JavaMLReadable, JavaMLWritable):
         """
         return self._set(column=value)
 
-class CustomVectorIndexer(JavaEstimator, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable):
+class CustomStringIndexer(JavaEstimator, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable):
 
     @keyword_only
     def __init__(self, inputCol=None, outputCol=None):
-        super(CustomVectorIndexer, self).__init__()
-        self._java_obj = self._new_java_obj("feature.CustomVectorIndexer", self.uid)
+        super(CustomStringIndexer, self).__init__()
+        self._java_obj = self._new_java_obj("feature.CustomStringIndexer", self.uid)
         kwargs = self._input_kwargs
         self.setParams(**kwargs)
 
@@ -69,12 +69,12 @@ class CustomVectorIndexer(JavaEstimator, HasInputCol, HasOutputCol, JavaMLReadab
         return self._set(outputCol=value)
 
     def _create_model(self, java_model):
-        return CustomVectorIndexerModel(java_model)
+        return CustomStringIndexerModel(java_model)
 
 
-class CustomVectorIndexerModel(JavaModel, JavaMLReadable, JavaMLWritable):
+class CustomStringIndexerModel(JavaModel, JavaMLReadable, JavaMLWritable):
     """
-    Model fitted by :py:class:`CustomVectorIndexer`.
+    Model fitted by :py:class:`CustomStringIndexer`.
     """
 
     def setInputCol(self, value):

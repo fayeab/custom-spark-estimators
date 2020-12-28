@@ -1,11 +1,11 @@
 import unittest
 import os
 import shutil
-from feature import CustomVectorIndexer, CustomVectorIndexerModel
+from feature import CustomStringIndexer, CustomStringIndexerModel
 from tests import spark
 
 
-class TestCustomVectorIndexer(unittest.TestCase):
+class TestCustomStringIndexer(unittest.TestCase):
 
     def test_fitting_model(self):
         """
@@ -14,11 +14,11 @@ class TestCustomVectorIndexer(unittest.TestCase):
         seq =  [(0, "aa"), (1, "ab"), (2, "cd"), (3, "ad"), (4, "aa")]
         dfm = spark.createDataFrame(seq).toDF("ID", "CATEGORY")
 
-        vectorizer = CustomVectorIndexer() \
+        indexer = CustomStringIndexer() \
             .setInputCol('CATEGORY') \
             .setOutputCol('CATEGORY_INDEX')
 
-        model = vectorizer.fit(dfm)
+        model = indexer.fit(dfm)
 
         self.assertDictEqual(
             dict(model.mapping_cat),
@@ -33,11 +33,11 @@ class TestCustomVectorIndexer(unittest.TestCase):
                 (3, "ad", 2.0), (4, "aa", 0.0)]
         dfm = spark.createDataFrame(seq).toDF("ID", "CATEGORY", "EXPECTED")
 
-        vectorizer = CustomVectorIndexer() \
+        indexer = CustomStringIndexer() \
             .setInputCol('CATEGORY') \
             .setOutputCol('CATEGORY_INDEX')
 
-        dfm_trans = vectorizer.fit(dfm).transform(dfm)
+        dfm_trans = indexer.fit(dfm).transform(dfm)
 
         for row in dfm_trans.select('EXPECTED', 'CATEGORY_INDEX').collect():
             self.assertEqual(row.EXPECTED, row.CATEGORY_INDEX)
@@ -53,15 +53,15 @@ class TestCustomVectorIndexer(unittest.TestCase):
         seq =  [(0, "aa"), (1, "ab"), (2, "cd"), (3, "ad"), (4, "aa")]
         dfm = spark.createDataFrame(sq).toDF("ID", "CATEGORY")
 
-        vectorizer = CustomVectorIndexer() \
+        indexer = CustomStringIndexer() \
             .setInputCol('CATEGORY') \
             .setOutputCol('CATEGORY_INDEX')
 
-        model = vectorizer.fit(dfm)
+        model = indexer.fit(dfm)
         df_transformed = model.transform(dfm)
 
         model.save(temp_path)
 
-        loaded_model = CustomVectorIndexerModel.load(temp_path)
+        loaded_model = CustomStringIndexerModel.load(temp_path)
         df_transformed_after_load = loaded_model.transform(dfm)
 

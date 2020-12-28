@@ -15,7 +15,7 @@ import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.broadcast.Broadcast
 
 
-trait CustomVectorIndexerParams extends Params {
+trait CustomStringIndexerParams extends Params {
 
   /**
    * Param for regularization parameter (&gt;= 0).
@@ -32,8 +32,8 @@ trait CustomVectorIndexerParams extends Params {
 
   /** Validates and transforms the input schema. */
   protected def validateAndTransformSchema(schema: StructType): StructType = {
-    require(isDefined(inputCol), s"CustomVectorIndexer requires input column parameter: $inputCol")
-    require(isDefined(outputCol), s"CustomVectorIndexer requires output column parameter: $outputCol")
+    require(isDefined(inputCol), s"CustomStringIndexer requires input column parameter: $inputCol")
+    require(isDefined(outputCol), s"CustomStringIndexer requires output column parameter: $outputCol")
 
     val field = schema.fields(schema.fieldIndex($(inputCol)))
 
@@ -48,12 +48,12 @@ trait CustomVectorIndexerParams extends Params {
 
 }
 
-class CustomVectorIndexerModel (
+class CustomStringIndexerModel (
                                  override val uid: String,
                                  mappingCat: Array[(String, Double)]
                                )
-  extends Model[CustomVectorIndexerModel] with CustomVectorIndexerParams
-    with DefaultParamsReadable[CustomVectorIndexerModel]  with DefaultParamsWritable
+  extends Model[CustomStringIndexerModel] with CustomStringIndexerParams
+    with DefaultParamsReadable[CustomStringIndexerModel]  with DefaultParamsWritable
     with MLWritable {
 
   /** @group setParam */
@@ -100,23 +100,23 @@ class CustomVectorIndexerModel (
   override def transformSchema(schema: StructType): StructType = {
     validateAndTransformSchema(schema)
   }
-  override def copy(extra: ParamMap): CustomVectorIndexerModel = {
-    val copied = new CustomVectorIndexerModel(uid,
+  override def copy(extra: ParamMap): CustomStringIndexerModel = {
+    val copied = new CustomStringIndexerModel(uid,
       mappingCat)
     copyValues(copied, extra).setParent(parent)
   }
 
-  override def write: MLWriter = new CustomVectorIndexerModel.CustomVectorIndexerModelWriter(this)
+  override def write: MLWriter = new CustomStringIndexerModel.CustomStringIndexerModelWriter(this)
 
   override def toString: String = {
-    s"CustomVectorIndexerModel: uid=$uid"
+    s"CustomStringIndexerModel: uid=$uid"
   }
 }
 
 
-object CustomVectorIndexerModel extends MLReadable[CustomVectorIndexerModel] {
+object CustomStringIndexerModel extends MLReadable[CustomStringIndexerModel] {
 
-  class CustomVectorIndexerModelWriter(instance: CustomVectorIndexerModel) extends MLWriter {
+  class CustomStringIndexerModelWriter(instance: CustomStringIndexerModel) extends MLWriter {
 
     private case class Data(mapping: Seq[(String, Integer)])
 
@@ -129,31 +129,31 @@ object CustomVectorIndexerModel extends MLReadable[CustomVectorIndexerModel] {
     }
   }
 
-  private class CustomVectorIndexerModelReader extends MLReader[CustomVectorIndexerModel] {
+  private class CustomStringIndexerModelReader extends MLReader[CustomStringIndexerModel] {
 
-    private val className = classOf[CustomVectorIndexerModel].getName
+    private val className = classOf[CustomStringIndexerModel].getName
 
-    override def load(path: String): CustomVectorIndexerModel = {
+    override def load(path: String): CustomStringIndexerModel = {
       val metadata = DefaultParamsReader.loadMetadata(path, sc, className)
       val dataPath = new Path(path, "data").toString
       val data = sparkSession.read.parquet(dataPath)
       val maps = data.collect().toList.map{e => {(e(0), e(1))}}
         .toArray
         .asInstanceOf[Array[(String, Double)]]
-      val model = new CustomVectorIndexerModel(metadata.uid, maps)
+      val model = new CustomStringIndexerModel(metadata.uid, maps)
       metadata.getAndSetParams(model)
       model
     }
   }
 
-  override def read: MLReader[CustomVectorIndexerModel] = new CustomVectorIndexerModelReader
+  override def read: MLReader[CustomStringIndexerModel] = new CustomStringIndexerModelReader
 
-  override def load(path: String): CustomVectorIndexerModel = super.load(path)
+  override def load(path: String): CustomStringIndexerModel = super.load(path)
 }
 
-class CustomVectorIndexer (override val uid: String)
-  extends Estimator[CustomVectorIndexerModel] with CustomVectorIndexerParams
-    with DefaultParamsReadable[CustomVectorIndexer]
+class CustomStringIndexer (override val uid: String)
+  extends Estimator[CustomStringIndexerModel] with CustomStringIndexerParams
+    with DefaultParamsReadable[CustomStringIndexer]
     with DefaultParamsWritable {
 
   def this() = this(Identifiable.randomUID("cstri"))
@@ -165,13 +165,13 @@ class CustomVectorIndexer (override val uid: String)
   def setOutputCol(value: String): this.type = set(outputCol, value)
 
 
-  override def fit(dataset: Dataset[_]): CustomVectorIndexerModel = {
+  override def fit(dataset: Dataset[_]): CustomStringIndexerModel = {
     val mappingCat = dataset.select($(inputCol))
       .distinct().collect()
       .map(_(0)).toArray
       .sortBy(_.asInstanceOf[String]).zipWithIndex
       .asInstanceOf[Array[(String, Double)]]
-    copyValues(new CustomVectorIndexerModel(uid,
+    copyValues(new CustomStringIndexerModel(uid,
       mappingCat).setParent(this))
 
   }
@@ -180,6 +180,6 @@ class CustomVectorIndexer (override val uid: String)
     validateAndTransformSchema(schema)
   }
 
-  override def copy(extra: ParamMap): CustomVectorIndexer = defaultCopy(extra)
+  override def copy(extra: ParamMap): CustomStringIndexer = defaultCopy(extra)
 
 }

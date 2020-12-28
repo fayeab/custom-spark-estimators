@@ -1,4 +1,4 @@
 from .feature import (ColumnFilter,
-                      CustomVectorIndexer, CustomVectorIndexerModel)
+                      CustomStringIndexer, CustomStringIndexerModel)
 __all__ = ['ColumnFilter',
-           'CustomVectorIndexer', 'CustomVectorIndexerModel']
+           'CustomStringIndexer', 'CustomStringIndexerModel']
